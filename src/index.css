@@ -26,5 +26,61 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better typography for document reading */
+  .prose {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+  
+  .prose h1 {
+    @apply text-4xl font-bold mb-6 mt-8 text-gray-900 dark:text-gray-100;
+  }
+  
+  .prose h2 {
+    @apply text-3xl font-semibold mb-4 mt-6 text-gray-900 dark:text-gray-100;
+  }
+  
+  .prose h3 {
+    @apply text-2xl font-medium mb-3 mt-4 text-gray-900 dark:text-gray-100;
+  }
+  
+  .prose h4 {
+    @apply text-xl font-medium mb-2 mt-3 text-gray-900 dark:text-gray-100;
+  }
+  
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+  
+  .prose-lg {
+    @apply text-lg;
+  }
+  
+  .prose-lg p {
+    @apply text-lg leading-relaxed;
+  }
+
+  /* Custom scrollbar for better reading experience */
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-600 rounded-md;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-gray-500;
   }
 }

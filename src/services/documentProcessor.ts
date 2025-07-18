@@ -1,10 +1,13 @@
-import type { Document } from '@/types'
+import type { Document, DocumentSection, TOCEntry } from '@/types'
 
 export class DocumentProcessor {
   static async processFile(file: File): Promise<Document> {
     const fileType = file.name.split('.').pop()?.toLowerCase() as 'pdf' | 'txt' | 'md' | 'epub'
 
     let content = ''
+    let sections: DocumentSection[] = []
+    let tableOfContents: TOCEntry[] = []
+
     const metadata = {
       createdAt: new Date(),
       modifiedAt: new Date(),
@@ -16,20 +19,31 @@ export class DocumentProcessor {
         case 'txt':
         case 'md':
           content = await this.processTextFile(file)
+          sections = this.extractSectionsFromText(content)
+          tableOfContents = this.generateTOCFromSections(sections)
           break
-        case 'pdf':
-          content = await this.processPDFFile(file)
+        case 'pdf': {
+          const pdfResult = await this.processPDFFile(file)
+          content = pdfResult.content
+          sections = pdfResult.sections
+          tableOfContents = pdfResult.tableOfContents
+          metadata.pages = pdfResult.pages || 1
           break
+        }
         case 'epub':
           content = await this.processEPUBFile(file)
+          sections = this.extractSectionsFromText(content)
+          tableOfContents = this.generateTOCFromSections(sections)
           break
         default:
           throw new Error(`Unsupported file type: ${fileType}`)
       }
 
-      // Calculate estimated pages (assuming ~300 words per page)
-      const wordCount = content.split(/\s+/).filter((word) => word.length > 0).length
-      metadata.pages = Math.max(1, Math.ceil(wordCount / 300))
+      // Calculate estimated pages if not set (assuming ~300 words per page)
+      if (!metadata.pages || metadata.pages === 1) {
+        const wordCount = content.split(/\s+/).filter((word) => word.length > 0).length
+        metadata.pages = Math.max(1, Math.ceil(wordCount / 300))
+      }
 
       return {
         id: crypto.randomUUID(),
@@ -37,6 +51,8 @@ export class DocumentProcessor {
         content,
         type: fileType,
         metadata,
+        sections,
+        tableOfContents,
       }
     } catch (error) {
       console.error('Error processing file:', error)
@@ -56,7 +72,12 @@ export class DocumentProcessor {
     })
   }
 
-  private static async processPDFFile(file: File): Promise<string> {
+  private static async processPDFFile(file: File): Promise<{
+    content: string
+    sections: DocumentSection[]
+    tableOfContents: TOCEntry[]
+    pages?: number
+  }> {
     try {
       const pdfjsLib = await import('pdfjs-dist')
 
@@ -106,6 +127,12 @@ export class DocumentProcessor {
             }
 
             let fullText = ''
+            const potentialTOCItems: Array<{
+              title: string
+              pageNum: number
+              fontSize: number
+              y: number
+            }> = []
 
             // Extract text from each page with reconstructed structure
             for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -114,18 +141,23 @@ export class DocumentProcessor {
                 const textContent = await page.getTextContent()
 
                 // Group text items by lines based on Y position
-                const lines: Array<{ y: number; items: any[] }> = []
+                const lines: Array<{ y: number; items: any[]; fontSize?: number }> = []
 
                 for (const item of textContent.items) {
                   const y = Math.round((item as any).transform[5])
+                  const fontSize = (item as any).height || 12
                   let lineGroup = lines.find((line) => Math.abs(line.y - y) < 3)
 
                   if (!lineGroup) {
-                    lineGroup = { y, items: [] }
+                    lineGroup = { y, items: [], fontSize }
                     lines.push(lineGroup)
                   }
 
                   lineGroup.items.push(item)
+                  // Track the largest font size in the line
+                  if (fontSize > (lineGroup.fontSize || 0)) {
+                    lineGroup.fontSize = fontSize
+                  }
                 }
 
                 // Sort lines by Y position (top to bottom)
@@ -133,6 +165,8 @@ export class DocumentProcessor {
 
                 let pageText = ''
                 let lastLineY = -1
+                const avgFontSize =
+                  lines.reduce((sum, l) => sum + (l.fontSize || 12), 0) / lines.length
 
                 for (const line of lines) {
                   // Sort items in line by X position (left to right)
@@ -160,6 +194,16 @@ export class DocumentProcessor {
                       pageText += '\n'
                     }
 
+                    // Detect potential headings based on font size
+                    if (line.fontSize && line.fontSize > avgFontSize * 1.2) {
+                      potentialTOCItems.push({
+                        title: lineText,
+                        pageNum: pageNum,
+                        fontSize: line.fontSize,
+                        y: line.y,
+                      })
+                    }
+
                     pageText += lineText
                     lastLineY = line.y
                   }
@@ -173,7 +217,16 @@ export class DocumentProcessor {
               }
             }
 
-            resolve(fullText.trim() || 'No text content found in PDF')
+            // Process detected headings into sections
+            const processedSections = this.processPDFSections(fullText, potentialTOCItems)
+            const toc = this.generateTOCFromSections(processedSections)
+
+            resolve({
+              content: fullText.trim() || 'No text content found in PDF',
+              sections: processedSections,
+              tableOfContents: toc,
+              pages: pdf.numPages,
+            })
           } catch (error) {
             console.error('Error processing PDF:', error)
             reject(new Error(`Failed to extract text from PDF: ${error}`))
@@ -186,7 +239,13 @@ export class DocumentProcessor {
     } catch (error) {
       console.error('Error importing PDF.js:', error)
       // Fallback: return basic info about the PDF
-      return `PDF file uploaded: ${file.name}\n\nPDF text extraction is temporarily unavailable. This is a PDF file with ${Math.ceil(file.size / 1024)}KB of content.\n\nPlease try uploading a text file (.txt) or markdown file (.md) for full text-to-speech functionality.`
+      const fallbackContent = `PDF file uploaded: ${file.name}\n\nPDF text extraction is temporarily unavailable. This is a PDF file with ${Math.ceil(file.size / 1024)}KB of content.\n\nPlease try uploading a text file (.txt) or markdown file (.md) for full text-to-speech functionality.`
+      return {
+        content: fallbackContent,
+        sections: [],
+        tableOfContents: [],
+        pages: 1,
+      }
     }
   }
 
@@ -232,5 +291,134 @@ export class DocumentProcessor {
       reader.onerror = () => reject(new Error('Failed to read EPUB file'))
       reader.readAsArrayBuffer(file)
     })
+  }
+
+  private static processPDFSections(
+    content: string,
+    potentialHeadings: Array<{ title: string; pageNum: number; fontSize: number; y: number }>
+  ): DocumentSection[] {
+    const sections: DocumentSection[] = []
+
+    // Sort headings by font size to determine hierarchy
+    const sortedHeadings = potentialHeadings.sort((a, b) => b.fontSize - a.fontSize)
+    const fontSizes = [...new Set(sortedHeadings.map((h) => h.fontSize))].sort((a, b) => b - a)
+
+    // Map font sizes to heading levels (1-6)
+    const fontSizeToLevel = new Map<number, number>()
+    fontSizes.forEach((size, index) => {
+      fontSizeToLevel.set(size, Math.min(index + 1, 6))
+    })
+
+    // Create sections from headings
+    sortedHeadings.forEach((heading, index) => {
+      const level = fontSizeToLevel.get(heading.fontSize) || 3
+      const startOffset = content.indexOf(heading.title)
+
+      if (startOffset !== -1) {
+        // Find the end offset (start of next section or end of content)
+        let endOffset = content.length
+        for (let i = index + 1; i < sortedHeadings.length; i++) {
+          const nextOffset = content.indexOf(
+            sortedHeadings[i].title,
+            startOffset + heading.title.length
+          )
+          if (nextOffset !== -1) {
+            endOffset = nextOffset
+            break
+          }
+        }
+
+        sections.push({
+          id: crypto.randomUUID(),
+          title: heading.title,
+          content: content.substring(startOffset, endOffset).trim(),
+          level,
+          pageNumber: heading.pageNum,
+          startOffset,
+          endOffset,
+        })
+      }
+    })
+
+    // Sort sections by their position in the document
+    return sections.sort((a, b) => a.startOffset - b.startOffset)
+  }
+
+  private static extractSectionsFromText(content: string): DocumentSection[] {
+    const sections: DocumentSection[] = []
+    const lines = content.split('\n')
+    let currentOffset = 0
+
+    // Simple heuristic: lines that are short and followed by blank lines might be headings
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim()
+      if (trimmedLine && trimmedLine.length < 80) {
+        const nextLine = lines[index + 1]
+        const prevLine = lines[index - 1]
+
+        // Check if this looks like a heading
+        if ((!nextLine || !nextLine.trim()) && (!prevLine || !prevLine.trim())) {
+          const startOffset = currentOffset
+          let endOffset = content.length
+
+          // Find where this section ends
+          for (let i = index + 2; i < lines.length; i++) {
+            if (
+              lines[i].trim() &&
+              lines[i].trim().length < 80 &&
+              (!lines[i + 1] || !lines[i + 1].trim())
+            ) {
+              endOffset = content.indexOf(lines[i], startOffset + trimmedLine.length)
+              break
+            }
+          }
+
+          sections.push({
+            id: crypto.randomUUID(),
+            title: trimmedLine,
+            content: content.substring(startOffset, endOffset).trim(),
+            level: 2, // Default level for text files
+            startOffset,
+            endOffset,
+          })
+        }
+      }
+      currentOffset += line.length + 1 // +1 for newline
+    })
+
+    return sections
+  }
+
+  private static generateTOCFromSections(sections: DocumentSection[]): TOCEntry[] {
+    const toc: TOCEntry[] = []
+    const stack: { entry: TOCEntry; level: number }[] = []
+
+    sections.forEach((section) => {
+      const entry: TOCEntry = {
+        id: crypto.randomUUID(),
+        title: section.title,
+        level: section.level,
+        sectionId: section.id,
+        pageNumber: section.pageNumber,
+        children: [],
+      }
+
+      // Find the appropriate parent
+      while (stack.length > 0 && stack[stack.length - 1].level >= section.level) {
+        stack.pop()
+      }
+
+      if (stack.length === 0) {
+        toc.push(entry)
+      } else {
+        const parent = stack[stack.length - 1].entry
+        if (!parent.children) parent.children = []
+        parent.children.push(entry)
+      }
+
+      stack.push({ entry, level: section.level })
+    })
+
+    return toc
   }
 }

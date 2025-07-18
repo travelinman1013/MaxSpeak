@@ -11,6 +11,36 @@ export interface Document {
   }
   lastReadPosition?: number
   bookmarks?: Bookmark[]
+  outline?: DocumentOutline[]
+  sections?: DocumentSection[]
+  tableOfContents?: TOCEntry[]
+}
+
+export interface DocumentOutline {
+  id: string
+  title: string
+  level: number
+  pageNumber?: number
+  children?: DocumentOutline[]
+}
+
+export interface DocumentSection {
+  id: string
+  title: string
+  content: string
+  level: number
+  pageNumber?: number
+  startOffset: number
+  endOffset: number
+}
+
+export interface TOCEntry {
+  id: string
+  title: string
+  level: number
+  sectionId: string
+  pageNumber?: number
+  children?: TOCEntry[]
 }
 
 export interface Bookmark {

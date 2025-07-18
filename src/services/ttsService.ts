@@ -138,9 +138,16 @@ export class TTSService {
         }
 
         this.currentUtterance.onerror = (event) => {
+          console.warn('TTS chunk error:', event.error)
           this.isPlaying = false
           useTTSStore.getState().setPlaying(false)
-          reject(new Error(`Speech synthesis error: ${event.error}`))
+
+          // Don't reject for "interrupted" or "canceled" errors - these are expected when stopping
+          if (event.error === 'interrupted' || event.error === 'canceled') {
+            resolve() // Treat as successful completion
+          } else {
+            reject(new Error(`Speech synthesis error: ${event.error}`))
+          }
         }
 
         this.currentUtterance.onpause = () => {
@@ -168,9 +175,16 @@ export class TTSService {
       }
 
       this.currentUtterance.onerror = (event) => {
+        console.warn('TTS first paragraph error:', event.error)
         this.isPlaying = false
         useTTSStore.getState().setPlaying(false)
-        reject(new Error(`Speech synthesis error: ${event.error}`))
+
+        // Don't reject for "interrupted" or "canceled" errors - these are expected when stopping
+        if (event.error === 'interrupted' || event.error === 'canceled') {
+          resolve() // Treat as successful completion
+        } else {
+          reject(new Error(`Speech synthesis error: ${event.error}`))
+        }
       }
 
       this.currentUtterance.onpause = () => {
@@ -199,15 +213,44 @@ export class TTSService {
   }
 
   stop(): void {
-    if (this.synthesis.speaking) {
-      this.synthesis.cancel()
+    try {
+      // Set flag first to prevent further processing
+      this.isPlaying = false
+
+      // Cancel any ongoing speech
+      if (this.synthesis.speaking || this.synthesis.pending) {
+        this.synthesis.cancel()
+      }
+
+      // Clean up current utterance
+      if (this.currentUtterance) {
+        this.currentUtterance.onend = null
+        this.currentUtterance.onerror = null
+        this.currentUtterance.onpause = null
+        this.currentUtterance.onresume = null
+        this.currentUtterance = null
+      }
+
+      // Reset state
+      this.textChunks = []
+      this.currentChunkIndex = 0
+
+      // Update store state
+      const store = useTTSStore.getState()
+      store.setPlaying(false)
+      store.setPaused(false)
+    } catch (error) {
+      console.warn('Error stopping TTS:', error)
+      // Ensure state is reset even if there's an error
+      this.isPlaying = false
+      this.currentUtterance = null
+      this.textChunks = []
+      this.currentChunkIndex = 0
+
+      const store = useTTSStore.getState()
+      store.setPlaying(false)
+      store.setPaused(false)
     }
-    this.isPlaying = false
-    this.currentUtterance = null
-    this.textChunks = []
-    this.currentChunkIndex = 0
-    useTTSStore.getState().setPlaying(false)
-    useTTSStore.getState().setPaused(false)
   }
 
   isSupported(): boolean {
