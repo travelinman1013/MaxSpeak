@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTTSStore, useDocumentStore } from '@/store'
 import { TTSService } from '@/services/ttsService'
 import { cn } from '@/lib/utils'
@@ -7,7 +7,7 @@ interface PlaybackControlsProps {
   className?: string
 }
 
-export function PlaybackControls({ className }: PlaybackControlsProps) {
+export const PlaybackControls = React.memo(function PlaybackControls({ className }: PlaybackControlsProps) {
   const { isPlaying, isPaused, settings, availableVoices, updateSettings } = useTTSStore()
   const { currentDocument } = useDocumentStore()
   const [ttsService] = useState(() => TTSService.getInstance())
@@ -41,19 +41,18 @@ export function PlaybackControls({ className }: PlaybackControlsProps) {
   }, [currentDocument?.content, settings.rate])
 
   useEffect(() => {
-    // Update current time during playback
+    // Update current time during playback (reduced frequency to improve performance)
     let interval: NodeJS.Timeout
     if (isPlaying && !isPaused) {
       interval = setInterval(() => {
         setCurrentTime((prev) => prev + 1)
-      }, 1000)
+      }, 2000) // Update every 2 seconds instead of 1 second for better performance
     }
     return () => clearInterval(interval)
   }, [isPlaying, isPaused])
 
-  const handlePlay = async () => {
+  const handlePlay = useCallback(async () => {
     if (!currentDocument?.content) {
-      alert('No document selected or content available')
       return
     }
 
@@ -76,34 +75,34 @@ export function PlaybackControls({ className }: PlaybackControlsProps) {
           !error.message.includes('interrupted') &&
           !error.message.includes('canceled')
         ) {
-          alert('Error playing text-to-speech. Please try again.')
+          console.warn('Error playing text-to-speech')
         }
       }
     }
-  }
+  }, [currentDocument?.content, isPaused, ttsService, settings])
 
-  const handlePause = () => {
+  const handlePause = useCallback(() => {
     ttsService.pause()
-  }
+  }, [ttsService])
 
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
     ttsService.stop()
     setCurrentTime(0)
-  }
+  }, [ttsService])
 
-  const skipForward = () => {
+  const skipForward = useCallback(() => {
     setCurrentTime((prev) => Math.min(prev + 10, totalTime))
-  }
+  }, [totalTime])
 
-  const skipBackward = () => {
+  const skipBackward = useCallback(() => {
     setCurrentTime((prev) => Math.max(prev - 10, 0))
-  }
+  }, [])
 
-  const adjustSpeed = (newRate: number) => {
+  const adjustSpeed = useCallback((newRate: number) => {
     updateSettings({ rate: newRate })
-  }
+  }, [updateSettings])
 
-  const formatTime = (seconds: number) => {
+  const formatTime = useCallback((seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     const secs = Math.floor(seconds % 60)
@@ -112,13 +111,16 @@ export function PlaybackControls({ className }: PlaybackControlsProps) {
       return `-${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     }
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
+  }, [])
 
-  const progressPercentage = totalTime > 0 ? (currentTime / totalTime) * 100 : 0
+  const progressPercentage = useMemo(() => 
+    totalTime > 0 ? (currentTime / totalTime) * 100 : 0,
+    [currentTime, totalTime]
+  )
 
-  const getCurrentVoice = () => {
+  const getCurrentVoice = useMemo(() => {
     return availableVoices.find((v) => v.name === settings.voice) || availableVoices[0]
-  }
+  }, [availableVoices, settings.voice])
 
   if (!ttsService.isSupported()) {
     return (
@@ -216,7 +218,7 @@ export function PlaybackControls({ className }: PlaybackControlsProps) {
                 className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
               >
                 <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-500 rounded-full flex items-center justify-center text-xs">
-                  {getCurrentVoice()?.name?.charAt(0) || '?'}
+                  {getCurrentVoice?.name?.charAt(0) || '?'}
                 </div>
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -283,4 +285,4 @@ export function PlaybackControls({ className }: PlaybackControlsProps) {
       </div>
     </div>
   )
-}
+})

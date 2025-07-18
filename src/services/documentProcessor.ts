@@ -135,8 +135,16 @@ export class DocumentProcessor {
             }> = []
 
             // Extract text from each page with reconstructed structure
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            // Limit processing to prevent browser freeze
+            const maxPages = Math.min(pdf.numPages, 100) // Limit to 100 pages for performance
+            
+            for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
               try {
+                // Yield control every 5 pages to prevent blocking
+                if (pageNum % 5 === 0) {
+                  await new Promise(resolve => setTimeout(resolve, 10))
+                }
+                
                 const page = await pdf.getPage(pageNum)
                 const textContent = await page.getTextContent()
 
@@ -211,6 +219,13 @@ export class DocumentProcessor {
 
                 if (pageText.trim()) {
                   fullText += pageText.trim() + '\n\n'
+                  
+                  // Prevent excessive memory usage - limit content size
+                  if (fullText.length > 500000) { // 500KB limit
+                    console.warn(`Document too large, truncating at page ${pageNum}`)
+                    fullText += '\n\n[Document truncated for performance...]'
+                    break
+                  }
                 }
               } catch (pageError) {
                 console.warn(`Failed to process page ${pageNum}:`, pageError)

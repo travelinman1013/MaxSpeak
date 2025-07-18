@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect, useCallback } from 'react'
 import { FileImportZone } from '@/components/features/FileImportZone'
 import { DocumentList } from '@/components/features/DocumentList'
 import { PlaybackControls } from '@/components/features/PlaybackControls'
@@ -13,7 +13,7 @@ function App() {
     initializeStorage()
   }, [initializeStorage])
 
-  const handleNavigateToSection = (sectionId: string) => {
+  const handleNavigateToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId)
     if (element) {
       // Scroll with offset to account for sticky header
@@ -26,7 +26,7 @@ function App() {
         behavior: 'smooth',
       })
     }
-  }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -95,4 +95,4 @@ function App() {
   )
 }
 
-export default App
+export default React.memo(App)

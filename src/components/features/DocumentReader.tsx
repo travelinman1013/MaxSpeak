@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import type { Document } from '@/types'
 import { cn } from '@/lib/utils'
 import { useTTSStore } from '@/store'
@@ -8,12 +8,13 @@ interface DocumentReaderProps {
   className?: string
 }
 
-export function DocumentReader({ document, className }: DocumentReaderProps) {
+export const DocumentReader = React.memo(function DocumentReader({ document, className }: DocumentReaderProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const { setPlaying, setPaused } = useTTSStore()
   const [currentPage, setCurrentPage] = useState(1)
   const [fontSize, setFontSize] = useState(16)
   const [selectedText, setSelectedText] = useState('')
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     // Scroll to top when document changes
@@ -24,21 +25,51 @@ export function DocumentReader({ document, className }: DocumentReaderProps) {
   }, [document.id])
 
   useEffect(() => {
-    // Handle text selection
+    // Check initial screen size and set up resize listener
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    
+    checkMobile()
+    
+    // Throttled resize handler to prevent excessive re-renders
+    let timeoutId: NodeJS.Timeout
+    const handleResize = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(checkMobile, 150)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timeoutId)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Handle text selection with debouncing
+    let timeoutId: NodeJS.Timeout
+    
     const handleSelection = () => {
-      const selection = window.getSelection()
-      if (selection && selection.toString().trim()) {
-        setSelectedText(selection.toString())
-      } else {
-        setSelectedText('')
-      }
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        const selection = window.getSelection()
+        if (selection && selection.toString().trim()) {
+          setSelectedText(selection.toString())
+        } else {
+          setSelectedText('')
+        }
+      }, 100)
     }
 
     window.document.addEventListener('selectionchange', handleSelection)
-    return () => window.document.removeEventListener('selectionchange', handleSelection)
+    return () => {
+      window.document.removeEventListener('selectionchange', handleSelection)
+      clearTimeout(timeoutId)
+    }
   }, [])
 
-  const handleReadSection = async (sectionContent: string) => {
+  const handleReadSection = useCallback(async (sectionContent: string) => {
     try {
       // Stop any current speech gracefully
       if (window.speechSynthesis.speaking) {
@@ -77,27 +108,32 @@ export function DocumentReader({ document, className }: DocumentReaderProps) {
       setPlaying(false)
       setPaused(false)
     }
-  }
+  }, [setPlaying, setPaused])
 
-  const adjustFontSize = (delta: number) => {
+  const adjustFontSize = useCallback((delta: number) => {
     setFontSize((prev) => Math.max(12, Math.min(24, prev + delta)))
-  }
+  }, [])
 
-  const totalPages = document.metadata?.pages || Math.ceil(document.content.length / 3000)
+  const totalPages = useMemo(() => 
+    document.metadata?.pages || Math.ceil(document.content.length / 3000),
+    [document.metadata?.pages, document.content.length]
+  )
 
-  const renderContent = () => {
+  const contentStyle = useMemo(() => ({
+    fontSize: `${fontSize}px`,
+    lineHeight: 1.6,
+    maxWidth: isMobile ? '100%' : '210mm',
+    fontFamily: 'Georgia, "Times New Roman", Times, serif',
+  }), [fontSize, isMobile])
+
+  const renderContent = useMemo(() => {
     if (!document.sections || document.sections.length === 0) {
       // Render as clean, book-like pages for PDFs
       return (
         <div className="max-w-none">
           <div
             className="bg-white dark:bg-gray-800 shadow-lg p-6 sm:p-12 min-h-[800px] leading-relaxed text-justify mx-4 sm:mx-auto"
-            style={{
-              fontSize: `${fontSize}px`,
-              lineHeight: 1.6,
-              maxWidth: window.innerWidth < 640 ? '100%' : '210mm', // Responsive A4 width
-              fontFamily: 'Georgia, "Times New Roman", Times, serif',
-            }}
+            style={contentStyle}
           >
             <div className="whitespace-pre-wrap break-words">{document.content}</div>
           </div>
@@ -111,7 +147,7 @@ export function DocumentReader({ document, className }: DocumentReaderProps) {
         <div
           className="bg-white dark:bg-gray-800 shadow-lg mx-4 sm:mx-auto p-6 sm:p-12 min-h-[800px]"
           style={{
-            maxWidth: window.innerWidth < 640 ? '100%' : '210mm', // Responsive A4 width
+            maxWidth: isMobile ? '100%' : '210mm',
             fontFamily: 'Georgia, "Times New Roman", Times, serif',
           }}
         >
@@ -167,7 +203,7 @@ export function DocumentReader({ document, className }: DocumentReaderProps) {
         </div>
       </div>
     )
-  }
+  }, [document.sections, document.content, contentStyle, fontSize, isMobile])
 
   return (
     <div className={cn('relative', className)}>
@@ -232,7 +268,7 @@ export function DocumentReader({ document, className }: DocumentReaderProps) {
         className="overflow-y-auto bg-gray-100 dark:bg-gray-950"
         style={{ height: 'calc(100vh - 200px)' }}
       >
-        <div className="py-8">{renderContent()}</div>
+        <div className="py-8">{renderContent}</div>
       </div>
 
       {/* Selection Context Menu */}
@@ -272,4 +308,4 @@ export function DocumentReader({ document, className }: DocumentReaderProps) {
       )}
     </div>
   )
-}
+})
