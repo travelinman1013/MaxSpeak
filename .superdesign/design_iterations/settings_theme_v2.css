@@ -1,0 +1,237 @@
+/* MaxSpeak Settings Theme v2.0 - Reading-Optimized */
+/* Generated with SuperDesign for MaxSpeak settings interface */
+
+:root {
+  /* Primary Colors - Orange & Green Scheme */
+  --primary: #FF8A65;
+  --primary-hover: #FF7043;
+  --primary-active: #FF5722;
+  --secondary: #66BB6A;
+  --secondary-hover: #4CAF50;
+  --secondary-active: #388E3C;
+  
+  /* Reading-Optimized Backgrounds */
+  --background-light: #FAFAFA;
+  --background-dark: #0A0A0A;
+  --surface-light: #FFFFFF;
+  --surface-dark: #1A1A1A;
+  --surface-elevated-light: #F5F5F5;
+  --surface-elevated-dark: #242424;
+  
+  /* High Contrast Text */
+  --text-primary-light: #1A1A1A;
+  --text-primary-dark: #FFFFFF;
+  --text-secondary-light: #424242;
+  --text-secondary-dark: #CCCCCC;
+  --text-disabled-light: #9E9E9E;
+  --text-disabled-dark: #616161;
+  
+  /* Border & Dividers */
+  --border-light: #E0E0E0;
+  --border-dark: #333333;
+  --divider-light: #EEEEEE;
+  --divider-dark: #2A2A2A;
+  
+  /* Status & Feedback Colors */
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --error: #F44336;
+  --info: #2196F3;
+  
+  /* Interactive States */
+  --hover-overlay-light: rgba(0, 0, 0, 0.04);
+  --hover-overlay-dark: rgba(255, 255, 255, 0.08);
+  --pressed-overlay-light: rgba(0, 0, 0, 0.08);
+  --pressed-overlay-dark: rgba(255, 255, 255, 0.12);
+  --focus-ring: #FF8A65;
+  
+  /* Accessibility Colors */
+  --focus-visible: #FF5722;
+  --link-color: #1976D2;
+  --link-visited: #7B1FA2;
+  
+  /* Typography */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Font Sizes - Reading Optimized */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* Line Heights - Optimized for Reading */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  
+  /* Spacing System */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;  /* 4px */
+  --radius-md: 0.5rem;   /* 8px */
+  --radius-lg: 0.75rem;  /* 12px */
+  --radius-xl: 1rem;     /* 16px */
+  --radius-full: 9999px;
+  
+  /* Shadows - Subtle for Reading */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Animation Timing */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+  
+  /* Touch Targets - Accessibility */
+  --touch-target-min: 44px;
+  --touch-target-recommended: 48px;
+  
+  /* Z-Index Scale */
+  --z-dropdown: 10;
+  --z-modal: 50;
+  --z-toast: 100;
+}
+
+/* Light Theme Variables */
+[data-theme="light"] {
+  --background: var(--background-light);
+  --surface: var(--surface-light);
+  --surface-elevated: var(--surface-elevated-light);
+  --text-primary: var(--text-primary-light);
+  --text-secondary: var(--text-secondary-light);
+  --text-disabled: var(--text-disabled-light);
+  --border: var(--border-light);
+  --divider: var(--divider-light);
+  --hover-overlay: var(--hover-overlay-light);
+  --pressed-overlay: var(--pressed-overlay-light);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  --background: var(--background-dark);
+  --surface: var(--surface-dark);
+  --surface-elevated: var(--surface-elevated-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --text-disabled: var(--text-disabled-dark);
+  --border: var(--border-dark);
+  --divider: var(--divider-dark);
+  --hover-overlay: var(--hover-overlay-dark);
+  --pressed-overlay: var(--pressed-overlay-dark);
+}
+
+/* System Theme Detection */
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --background: var(--background-dark);
+    --surface: var(--surface-dark);
+    --surface-elevated: var(--surface-elevated-dark);
+    --text-primary: var(--text-primary-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --text-disabled: var(--text-disabled-dark);
+    --border: var(--border-dark);
+    --divider: var(--divider-dark);
+    --hover-overlay: var(--hover-overlay-dark);
+    --pressed-overlay: var(--pressed-overlay-dark);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  [data-theme="system"] {
+    --background: var(--background-light);
+    --surface: var(--surface-light);
+    --surface-elevated: var(--surface-elevated-light);
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
+    --text-disabled: var(--text-disabled-light);
+    --border: var(--border-light);
+    --divider: var(--divider-light);
+    --hover-overlay: var(--hover-overlay-light);
+    --pressed-overlay: var(--pressed-overlay-light);
+  }
+}
+
+/* Base Typography */
+body {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--text-base) !important;
+  line-height: var(--leading-normal) !important;
+  color: var(--text-primary) !important;
+  background-color: var(--background) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-primary) !important;
+  color: var(--text-primary) !important;
+  line-height: var(--leading-tight) !important;
+}
+
+/* Reading Optimizations */
+.reading-optimized {
+  font-size: var(--text-lg) !important;
+  line-height: var(--leading-relaxed) !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary-light: #000000;
+    --text-primary-dark: #FFFFFF;
+    --border-light: #000000;
+    --border-dark: #FFFFFF;
+    --background-light: #FFFFFF;
+    --background-dark: #000000;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  :root {
+    --background: white !important;
+    --surface: white !important;
+    --text-primary: black !important;
+    --text-secondary: #333 !important;
+  }
+  
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxSpeak Theme Selection Dialog - Interactive Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Same theme variables as settings page */
+        :root {
+            --primary: #FF8A65;
+            --primary-hover: #FF7043;
+            --secondary: #66BB6A;
+            --background-light: #FAFAFA;
+            --background-dark: #0A0A0A;
+            --surface-light: #FFFFFF;
+            --surface-dark: #1A1A1A;
+            --text-primary-light: #1A1A1A;
+            --text-primary-dark: #FFFFFF;
+            --text-secondary-light: #424242;
+            --text-secondary-dark: #CCCCCC;
+            --border-light: #E0E0E0;
+            --border-dark: #333333;
+        }
+
+        [data-theme="light"] {
+            --background: var(--background-light);
+            --surface: var(--surface-light);
+            --text-primary: var(--text-primary-light);
+            --text-secondary: var(--text-secondary-light);
+            --border: var(--border-light);
+        }
+
+        [data-theme="dark"] {
+            --background: var(--background-dark);
+            --surface: var(--surface-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border: var(--border-dark);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            [data-theme="system"] {
+                --background: var(--background-dark);
+                --surface: var(--surface-dark);
+                --text-primary: var(--text-primary-dark);
+                --text-secondary: var(--text-secondary-dark);
+                --border: var(--border-dark);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            [data-theme="system"] {
+                --background: var(--background-light);
+                --surface: var(--surface-light);
+                --text-primary: var(--text-primary-light);
+                --text-secondary: var(--text-secondary-light);
+                --border: var(--border-light);
+            }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif !important;
+            background-color: var(--background) !important;
+            color: var(--text-primary) !important;
+            transition: all 0.25s ease-out;
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            animation: slideUp 0.3s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .theme-preview-card {
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            background-color: var(--surface);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-preview-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-preview-card.selected {
+            border-color: var(--primary);
+            background-color: rgba(255, 138, 101, 0.05);
+        }
+
+        .theme-preview-card.selected::after {
+            content: '';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-preview-card.selected::before {
+            content: '✓';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 20px;
+            height: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .preview-mockup {
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Light theme preview */
+        .preview-light {
+            background-color: #FAFAFA;
+            border-color: #E0E0E0;
+            color: #1A1A1A;
+        }
+
+        .preview-light .preview-surface {
+            background-color: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+        }
+
+        /* Dark theme preview */
+        .preview-dark {
+            background-color: #0A0A0A;
+            border-color: #333333;
+            color: #FFFFFF;
+        }
+
+        .preview-dark .preview-surface {
+            background-color: #1A1A1A;
+            border: 1px solid #333333;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+        }
+
+        /* Auto theme preview (shows both) */
+        .preview-auto {
+            background: linear-gradient(90deg, #FAFAFA 50%, #0A0A0A 50%);
+            border-color: #666666;
+            color: #1A1A1A;
+            position: relative;
+        }
+
+        .preview-auto::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+        }
+
+        .preview-auto .preview-text-dark {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #FFFFFF;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(100px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .button-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            min-width: 100px;
+        }
+
+        .button-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 138, 101, 0.3);
+        }
+
+        .button-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            min-width: 100px;
+        }
+
+        .button-secondary:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 640px) {
+            .modal-content {
+                margin: 0;
+                border-radius: 1rem 1rem 0 0;
+                max-height: 85vh;
+            }
+            
+            .theme-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-theme="system" class="min-h-screen flex items-center justify-center p-4">
+    
+    <!-- Modal Overlay -->
+    <div class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        
+        <!-- Modal Content -->
+        <div class="modal-content w-full max-w-lg rounded-xl shadow-2xl">
+            
+            <!-- Modal Header -->
+            <header class="flex items-center justify-between p-6 border-b" style="border-color: var(--border)">
+                <h2 class="text-xl font-semibold">Choose Theme</h2>
+                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors" onclick="closeModal()">
+                    <i data-lucide="x" class="w-5 h-5" style="color: var(--text-secondary)"></i>
+                </button>
+            </header>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+                <p class="text-sm mb-6" style="color: var(--text-secondary)">
+                    Select your preferred theme. System theme automatically switches between light and dark based on your device settings.
+                </p>
+
+                <!-- Theme Options Grid -->
+                <div class="theme-grid grid grid-cols-1 gap-4 mb-6">
+                    
+                    <!-- Light Theme Option -->
+                    <div class="theme-preview-card" data-theme-option="light" onclick="selectThemeOption('light')">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="sun" class="w-5 h-5 mr-3" style="color: var(--primary)"></i>
+                            <div>
+                                <h3 class="font-semibold">Light Theme</h3>
+                                <p class="text-sm" style="color: var(--text-secondary)">Bright and clean interface</p>
+                            </div>
+                        </div>
+                        <div class="preview-mockup preview-light">
+                            <div class="preview-surface">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-xs font-medium">📚 Your Library</div>
+                                    <div class="text-xs">⚙️</div>
+                                </div>
+                            </div>
+                            <div class="preview-surface">
+                                <div class="text-xs">Document Title</div>
+                                <div class="text-xs opacity-60">45% read</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Theme Option -->
+                    <div class="theme-preview-card selected" data-theme-option="system" onclick="selectThemeOption('system')">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="monitor" class="w-5 h-5 mr-3" style="color: var(--primary)"></i>
+                            <div>
+                                <h3 class="font-semibold">System Theme</h3>
+                                <p class="text-sm" style="color: var(--text-secondary)">Automatically adapts to device settings</p>
+                            </div>
+                        </div>
+                        <div class="preview-mockup preview-auto">
+                            <div class="text-xs font-medium">📚 Auto</div>
+                            <div class="preview-text-dark text-xs font-medium">📚 Auto</div>
+                            <div class="text-xs">Switches automatically</div>
+                        </div>
+                    </div>
+
+                    <!-- Dark Theme Option -->
+                    <div class="theme-preview-card" data-theme-option="dark" onclick="selectThemeOption('dark')">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="moon" class="w-5 h-5 mr-3" style="color: var(--primary)"></i>
+                            <div>
+                                <h3 class="font-semibold">Dark Theme</h3>
+                                <p class="text-sm" style="color: var(--text-secondary)">Easy on the eyes, battery efficient</p>
+                            </div>
+                        </div>
+                        <div class="preview-mockup preview-dark">
+                            <div class="preview-surface">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-xs font-medium">📚 Your Library</div>
+                                    <div class="text-xs">⚙️</div>
+                                </div>
+                            </div>
+                            <div class="preview-surface">
+                                <div class="text-xs">Document Title</div>
+                                <div class="text-xs opacity-60">45% read</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
+                    <div class="flex items-start">
+                        <i data-lucide="lightbulb" class="w-5 h-5 mr-3 mt-0.5 text-orange-600 dark:text-orange-400"></i>
+                        <div>
+                            <h4 class="font-medium text-orange-800 dark:text-orange-200 mb-1">Reading Optimization</h4>
+                            <p class="text-sm text-orange-700 dark:text-orange-300">
+                                Dark theme reduces eye strain during extended reading sessions and improves battery life on OLED displays.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <footer class="flex items-center justify-end space-x-3 p-6 border-t" style="border-color: var(--border)">
+                <button class="button-secondary" onclick="closeModal()">
+                    Cancel
+                </button>
+                <button class="button-primary" onclick="applyTheme()">
+                    Apply Theme
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        let selectedTheme = 'system';
+
+        function selectThemeOption(theme) {
+            // Update visual selection
+            document.querySelectorAll('.theme-preview-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-theme-option="${theme}"]`).classList.add('selected');
+            
+            selectedTheme = theme;
+            
+            // Apply theme preview immediately
+            document.body.setAttribute('data-theme', theme);
+            
+            // Simulate haptic feedback
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+            
+            console.log(`Theme preview: ${theme}`);
+        }
+
+        function applyTheme() {
+            console.log(`Applying theme: ${selectedTheme}`);
+            
+            // Simulate theme application with success feedback
+            const button = document.querySelector('.button-primary');
+            const originalText = button.textContent;
+            
+            button.textContent = 'Applied!';
+            button.style.backgroundColor = '#4CAF50';
+            
+            setTimeout(() => {
+                closeModal();
+            }, 1000);
+            
+            // In a real app, this would save the theme preference
+            localStorage.setItem('maxspeak-theme', selectedTheme);
+        }
+
+        function closeModal() {
+            // Add fade out animation
+            const overlay = document.querySelector('.modal-overlay');
+            overlay.style.animation = 'fadeOut 0.2s ease-out forwards';
+            
+            setTimeout(() => {
+                // In a real app, this would navigate back or close the modal
+                console.log('Modal closed');
+                // For demo purposes, we'll just hide the modal
+                overlay.style.display = 'none';
+            }, 200);
+        }
+
+        // Add fade out animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Handle keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            } else if (e.key === 'Enter') {
+                const focusedCard = document.activeElement;
+                if (focusedCard.classList.contains('theme-preview-card')) {
+                    const theme = focusedCard.getAttribute('data-theme-option');
+                    selectThemeOption(theme);
+                } else if (focusedCard.classList.contains('button-primary')) {
+                    applyTheme();
+                }
+            }
+        });
+
+        // Make theme cards focusable
+        document.querySelectorAll('.theme-preview-card').forEach(card => {
+            card.setAttribute('tabindex', '0');
+            card.addEventListener('focus', function() {
+                this.style.outline = '2px solid var(--primary)';
+                this.style.outlineOffset = '2px';
+            });
+            card.addEventListener('blur', function() {
+                this.style.outline = 'none';
+            });
+        });
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('maxspeak-theme') || 'system';
+        selectThemeOption(savedTheme);
+
+        console.log('MaxSpeak Theme Selection Dialog loaded successfully!');
+    </script>
+</body>
+</html>

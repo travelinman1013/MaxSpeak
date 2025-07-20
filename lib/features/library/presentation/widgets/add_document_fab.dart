@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/utils/app_theme.dart';
+import '../providers/document_provider.dart';
 
-class AddDocumentFab extends StatelessWidget {
+class AddDocumentFab extends ConsumerWidget {
   const AddDocumentFab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return FloatingActionButton(
-      onPressed: () => _showAddDocumentOptions(context),
+      onPressed: () => _showAddDocumentOptions(context, ref),
       backgroundColor: AppTheme.primaryColor,
       foregroundColor: Colors.white,
       elevation: 8,
@@ -16,7 +19,7 @@ class AddDocumentFab extends StatelessWidget {
     );
   }
 
-  void _showAddDocumentOptions(BuildContext context) {
+  void _showAddDocumentOptions(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -55,7 +58,7 @@ class AddDocumentFab extends StatelessWidget {
                 icon: Icons.file_upload_outlined,
                 title: 'Upload from Device',
                 subtitle: 'Choose PDF from your device',
-                onTap: () => _pickFileFromDevice(context),
+                onTap: () => _pickFileFromDevice(context, ref),
               ),
               const SizedBox(height: AppTheme.spacingM),
               
@@ -149,7 +152,7 @@ class AddDocumentFab extends StatelessWidget {
     );
   }
 
-  Future<void> _pickFileFromDevice(BuildContext context) async {
+  Future<void> _pickFileFromDevice(BuildContext context, WidgetRef ref) async {
     Navigator.pop(context);
     
     try {
@@ -163,24 +166,71 @@ class AddDocumentFab extends StatelessWidget {
         final file = result.files.first;
         
         if (file.path != null) {
-          // TODO: Add document to library
+          // Show loading snackbar
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Adding ${file.name}...'),
-                action: SnackBarAction(
-                  label: 'View',
-                  onPressed: () {
-                    // TODO: Navigate to document
-                  },
+                content: Row(
+                  children: [
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text('Adding ${file.name}...')),
+                  ],
                 ),
+                duration: const Duration(seconds: 30), // Long duration for processing
               ),
             );
+          }
+
+          // Add document using provider
+          final documentsNotifier = ref.read(documentsProvider.notifier);
+          final success = await documentsNotifier.addDocumentFromPath(file.path!);
+          
+          if (context.mounted) {
+            // Clear the loading snackbar
+            ScaffoldMessenger.of(context).clearSnackBars();
+            
+            if (success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${AppConstants.documentAddedSuccess}: ${file.name}'),
+                  backgroundColor: AppTheme.secondaryColor,
+                  action: SnackBarAction(
+                    label: 'View',
+                    textColor: Colors.white,
+                    onPressed: () {
+                      // TODO: Navigate to document reader
+                    },
+                  ),
+                ),
+              );
+            } else {
+              final error = ref.read(documentsProvider).error ?? 'Unknown error occurred';
+              final userFriendlyError = _getUserFriendlyErrorMessage(error);
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to add document: $userFriendlyError'),
+                  backgroundColor: AppTheme.errorColor,
+                  duration: const Duration(seconds: 6),
+                  action: SnackBarAction(
+                    label: 'Retry',
+                    textColor: Colors.white,
+                    onPressed: () => _pickFileFromDevice(context, ref),
+                  ),
+                ),
+              );
+            }
           }
         }
       }
     } catch (e) {
       if (context.mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error picking file: ${e.toString()}'),
@@ -203,5 +253,41 @@ class AddDocumentFab extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Document scanning - Coming Soon')),
     );
+  }
+
+  /// Convert technical error messages to user-friendly ones
+  String _getUserFriendlyErrorMessage(String error) {
+    final lowerError = error.toLowerCase();
+    
+    if (lowerError.contains('too large') || lowerError.contains('size')) {
+      return 'File is too large (max ${AppConstants.maxPdfSizeMB}MB)';
+    }
+    
+    if (lowerError.contains('corrupted') || lowerError.contains('invalid') || lowerError.contains('not a valid pdf')) {
+      return 'File is not a valid PDF document';
+    }
+    
+    if (lowerError.contains('permission') || lowerError.contains('access')) {
+      return 'Permission denied - check file access';
+    }
+    
+    if (lowerError.contains('storage') || lowerError.contains('space')) {
+      return 'Not enough storage space available';
+    }
+    
+    if (lowerError.contains('encryption') || lowerError.contains('security')) {
+      return 'Security error - please try again';
+    }
+    
+    if (lowerError.contains('network') || lowerError.contains('connection')) {
+      return 'Network error - check your connection';
+    }
+    
+    if (lowerError.contains('not found') || lowerError.contains('file not found')) {
+      return 'File could not be found';
+    }
+    
+    // If no specific error pattern matches, return a generic but helpful message
+    return 'Unable to process file - please try a different PDF';
   }
 }

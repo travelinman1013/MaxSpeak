@@ -6,7 +6,7 @@ abstract class Failure extends Equatable {
   const Failure(this.message);
   
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 }
 
 // General failures
@@ -23,6 +23,10 @@ class CacheFailure extends Failure {
 }
 
 // Document-specific failures
+class DocumentFailure extends Failure {
+  const DocumentFailure(super.message);
+}
+
 class DocumentNotFoundFailure extends Failure {
   const DocumentNotFoundFailure(super.message);
 }

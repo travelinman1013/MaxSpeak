@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/utils/app_theme.dart';
+import '../providers/document_provider.dart';
 import '../widgets/document_grid.dart';
 import '../widgets/library_app_bar.dart';
 import '../widgets/bottom_navigation.dart';
@@ -17,6 +18,15 @@ class LibraryPage extends ConsumerStatefulWidget {
 
 class _LibraryPageState extends ConsumerState<LibraryPage> {
   int _currentNavIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the documents provider when the page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(documentsProvider.notifier).initialize();
+    });
+  }
 
   void _onNavTap(int index) {
     setState(() {

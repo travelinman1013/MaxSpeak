@@ -25,10 +25,12 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
   
   # Security
   flutter_secure_storage: ^9.0.0
   encrypt: ^5.0.3
+  crypto: ^3.0.3
   
   # PDF Handling
   pdfx: ^2.6.0  # PDF.js based Flutter plugin
@@ -72,15 +74,3 @@ flutter:
   
   assets:
     - assets/images/
-    - assets/fonts/
-  
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
-        - asset: assets/fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Inter-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Inter-Bold.ttf
-          weight: 700

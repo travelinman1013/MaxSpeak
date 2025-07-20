@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxSpeak Settings - Interactive Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Import custom theme variables */
+        :root {
+            --primary: #FF8A65;
+            --primary-hover: #FF7043;
+            --secondary: #66BB6A;
+            --background-light: #FAFAFA;
+            --background-dark: #0A0A0A;
+            --surface-light: #FFFFFF;
+            --surface-dark: #1A1A1A;
+            --text-primary-light: #1A1A1A;
+            --text-primary-dark: #FFFFFF;
+            --text-secondary-light: #424242;
+            --text-secondary-dark: #CCCCCC;
+            --border-light: #E0E0E0;
+            --border-dark: #333333;
+            --hover-overlay-light: rgba(0, 0, 0, 0.04);
+            --hover-overlay-dark: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] {
+            --background: var(--background-light);
+            --surface: var(--surface-light);
+            --text-primary: var(--text-primary-light);
+            --text-secondary: var(--text-secondary-light);
+            --border: var(--border-light);
+            --hover-overlay: var(--hover-overlay-light);
+        }
+
+        [data-theme="dark"] {
+            --background: var(--background-dark);
+            --surface: var(--surface-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border: var(--border-dark);
+            --hover-overlay: var(--hover-overlay-dark);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            [data-theme="system"] {
+                --background: var(--background-dark);
+                --surface: var(--surface-dark);
+                --text-primary: var(--text-primary-dark);
+                --text-secondary: var(--text-secondary-dark);
+                --border: var(--border-dark);
+                --hover-overlay: var(--hover-overlay-dark);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            [data-theme="system"] {
+                --background: var(--background-light);
+                --surface: var(--surface-light);
+                --text-primary: var(--text-primary-light);
+                --text-secondary: var(--text-secondary-light);
+                --border: var(--border-light);
+                --hover-overlay: var(--hover-overlay-light);
+            }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif !important;
+            background-color: var(--background) !important;
+            color: var(--text-primary) !important;
+            transition: all 0.25s ease-out;
+        }
+
+        .settings-surface {
+            background-color: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        .settings-hover:hover {
+            background-color: var(--hover-overlay) !important;
+        }
+
+        .section-header {
+            color: var(--text-secondary) !important;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .setting-item {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease-out;
+            cursor: pointer;
+        }
+
+        .setting-item:hover {
+            background-color: var(--hover-overlay);
+            transform: translateY(-1px);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background-color: #9CA3AF;
+            border-radius: 12px;
+            transition: all 0.25s ease-out;
+            cursor: pointer;
+        }
+
+        .toggle-switch.active {
+            background-color: var(--primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: all 0.25s ease-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        .theme-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid var(--border);
+            background-color: var(--surface);
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            min-width: 80px;
+        }
+
+        .theme-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(255, 138, 101, 0.1);
+        }
+
+        .icon-container {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            color: var(--primary);
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #E5E7EB;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 0.5rem 0;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease-out;
+        }
+
+        .section-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .theme-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.75rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .settings-container {
+                max-width: 768px;
+                margin: 0 auto;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body data-theme="system" class="min-h-screen">
+    <!-- App Bar -->
+    <header class="settings-surface border-b">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center">
+                <button class="p-2 rounded-lg settings-hover mr-2" onclick="window.history.back()">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold">Settings</h1>
+            </div>
+            <button class="p-2 rounded-lg settings-hover" onclick="refreshSettings()">
+                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Settings Content -->
+    <main class="settings-container px-4 py-6 space-y-6">
+        
+        <!-- Appearance Section -->
+        <section class="section-card fade-in">
+            <h2 class="section-header flex items-center">
+                <i data-lucide="palette" class="w-4 h-4 mr-2"></i>
+                Appearance
+            </h2>
+            
+            <!-- Theme Mode Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-3" style="color: var(--text-primary)">Theme Mode</label>
+                <div class="theme-grid grid grid-cols-3 gap-3">
+                    <div class="theme-option" data-theme-option="light" onclick="selectTheme('light')">
+                        <i data-lucide="sun" class="w-6 h-6 mb-2" style="color: var(--primary)"></i>
+                        <span class="text-sm font-medium">Light</span>
+                    </div>
+                    <div class="theme-option selected" data-theme-option="system" onclick="selectTheme('system')">
+                        <i data-lucide="monitor" class="w-6 h-6 mb-2" style="color: var(--primary)"></i>
+                        <span class="text-sm font-medium">System</span>
+                    </div>
+                    <div class="theme-option" data-theme-option="dark" onclick="selectTheme('dark')">
+                        <i data-lucide="moon" class="w-6 h-6 mb-2" style="color: var(--primary)"></i>
+                        <span class="text-sm font-medium">Dark</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Font Size Control -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-3" style="color: var(--text-primary)">Reading Font Size</label>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm" style="color: var(--text-secondary)">Small</span>
+                    <input type="range" class="range-slider flex-1" min="12" max="24" value="16" id="fontSizeSlider" oninput="updateFontSize(this.value)">
+                    <span class="text-sm" style="color: var(--text-secondary)">Large</span>
+                </div>
+                <div class="mt-2 text-center">
+                    <span class="text-sm font-medium" style="color: var(--text-primary)" id="fontSizeLabel">Medium (16px)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reading Preferences Section -->
+        <section class="section-card fade-in">
+            <h2 class="section-header flex items-center">
+                <i data-lucide="book-open" class="w-4 h-4 mr-2"></i>
+                Reading Preferences
+            </h2>
+            
+            <div class="space-y-1">
+                <div class="setting-item settings-hover" onclick="toggleSetting('haptic')">
+                    <div class="icon-container">
+                        <i data-lucide="smartphone" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Haptic Feedback</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Vibrate on interactions</div>
+                    </div>
+                    <div class="toggle-switch active" id="haptic-toggle"></div>
+                </div>
+
+                <div class="setting-item settings-hover" onclick="toggleSetting('sounds')">
+                    <div class="icon-container">
+                        <i data-lucide="volume-2" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Reading Sounds</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Audio feedback for actions</div>
+                    </div>
+                    <div class="toggle-switch" id="sounds-toggle"></div>
+                </div>
+
+                <div class="setting-item settings-hover" onclick="toggleSetting('autosave')">
+                    <div class="icon-container">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Auto-Save Progress</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Automatically save reading position</div>
+                    </div>
+                    <div class="toggle-switch active" id="autosave-toggle"></div>
+                </div>
+
+                <div class="setting-item settings-hover" onclick="toggleSetting('sync')">
+                    <div class="icon-container">
+                        <i data-lucide="cloud" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Sync Across Devices</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Sync library and progress</div>
+                    </div>
+                    <div class="toggle-switch" id="sync-toggle"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TTS Settings Section -->
+        <section class="section-card fade-in">
+            <h2 class="section-header flex items-center">
+                <i data-lucide="mic" class="w-4 h-4 mr-2"></i>
+                Text-to-Speech Settings
+            </h2>
+            
+            <div class="space-y-1">
+                <div class="setting-item settings-hover" onclick="openVoiceSelection()">
+                    <div class="icon-container">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Default Voice</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Samantha (US English)</div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5" style="color: var(--text-secondary)"></i>
+                </div>
+
+                <!-- Speech Rate Control -->
+                <div class="setting-item">
+                    <div class="icon-container">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium mb-2">Speech Rate</div>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm" style="color: var(--text-secondary)">0.5x</span>
+                            <input type="range" class="range-slider flex-1" min="0.5" max="3" step="0.1" value="1.5" id="speechRateSlider" oninput="updateSpeechRate(this.value)">
+                            <span class="text-sm" style="color: var(--text-secondary)">3x</span>
+                        </div>
+                        <div class="mt-1 text-center">
+                            <span class="text-sm font-medium" style="color: var(--text-primary)" id="speechRateLabel">1.5x</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item settings-hover" onclick="openAdvancedTTS()">
+                    <div class="icon-container">
+                        <i data-lucide="sliders" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Pitch & Volume</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Advanced audio settings</div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5" style="color: var(--text-secondary)"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section-card fade-in">
+            <h2 class="section-header flex items-center">
+                <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                About
+            </h2>
+            
+            <div class="space-y-1">
+                <div class="setting-item">
+                    <div class="icon-container">
+                        <i data-lucide="smartphone" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">App Version</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">MaxSpeak v1.0.0 (Alpha)</div>
+                    </div>
+                </div>
+
+                <div class="setting-item settings-hover" onclick="openPrivacyPolicy()">
+                    <div class="icon-container">
+                        <i data-lucide="shield" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Privacy Policy</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">How we protect your data</div>
+                    </div>
+                    <i data-lucide="external-link" class="w-4 h-4" style="color: var(--text-secondary)"></i>
+                </div>
+
+                <div class="setting-item settings-hover" onclick="openTermsOfService()">
+                    <div class="icon-container">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Terms of Service</div>
+                        <div class="text-sm" style="color: var(--text-secondary)">Legal terms and conditions</div>
+                    </div>
+                    <i data-lucide="external-link" class="w-4 h-4" style="color: var(--text-secondary)"></i>
+                </div>
+
+                <div class="setting-item settings-hover" onclick="confirmResetSettings()" style="color: #F44336;">
+                    <div class="icon-container">
+                        <i data-lucide="refresh-ccw" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">Reset All Settings</div>
+                        <div class="text-sm opacity-70">Restore default configuration</div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-70"></i>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Theme management
+        function selectTheme(theme) {
+            // Update visual selection
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-theme-option="${theme}"]`).classList.add('selected');
+            
+            // Apply theme
+            document.body.setAttribute('data-theme', theme);
+            
+            // Add pulse animation
+            document.querySelector(`[data-theme-option="${theme}"]`).classList.add('pulse');
+            setTimeout(() => {
+                document.querySelector(`[data-theme-option="${theme}"]`).classList.remove('pulse');
+            }, 500);
+            
+            // Simulate haptic feedback
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+            
+            console.log(`Theme changed to: ${theme}`);
+        }
+
+        // Toggle settings
+        function toggleSetting(settingName) {
+            const toggle = document.getElementById(`${settingName}-toggle`);
+            toggle.classList.toggle('active');
+            
+            // Simulate haptic feedback
+            if ('vibrate' in navigator) {
+                navigator.vibrate(25);
+            }
+            
+            console.log(`${settingName} toggled:`, toggle.classList.contains('active'));
+        }
+
+        // Font size control
+        function updateFontSize(value) {
+            const label = document.getElementById('fontSizeLabel');
+            const sizes = {
+                12: 'Small (12px)',
+                14: 'Small (14px)', 
+                16: 'Medium (16px)',
+                18: 'Medium (18px)',
+                20: 'Large (20px)',
+                22: 'Large (22px)',
+                24: 'Extra Large (24px)'
+            };
+            label.textContent = sizes[value] || `${value}px`;
+            
+            // Apply font size change to demo text
+            document.body.style.fontSize = `${value}px`;
+            
+            console.log(`Font size changed to: ${value}px`);
+        }
+
+        // Speech rate control
+        function updateSpeechRate(value) {
+            const label = document.getElementById('speechRateLabel');
+            label.textContent = `${parseFloat(value).toFixed(1)}x`;
+            console.log(`Speech rate changed to: ${value}x`);
+        }
+
+        // Navigation functions
+        function openVoiceSelection() {
+            console.log('Opening voice selection...');
+            // Simulate navigation to voice selection screen
+            alert('Voice selection screen would open here');
+        }
+
+        function openAdvancedTTS() {
+            console.log('Opening advanced TTS settings...');
+            alert('Advanced TTS settings would open here');
+        }
+
+        function openPrivacyPolicy() {
+            console.log('Opening privacy policy...');
+            window.open('https://example.com/privacy', '_blank');
+        }
+
+        function openTermsOfService() {
+            console.log('Opening terms of service...');
+            window.open('https://example.com/terms', '_blank');
+        }
+
+        function confirmResetSettings() {
+            if (confirm('Are you sure you want to reset all settings? This action cannot be undone.')) {
+                console.log('Resetting all settings...');
+                alert('Settings reset successfully!');
+                // Reset all toggles and sliders to default
+                window.location.reload();
+            }
+        }
+
+        function refreshSettings() {
+            console.log('Refreshing settings...');
+            // Add rotation animation to refresh icon
+            const refreshIcon = document.querySelector('[data-lucide="refresh-cw"]');
+            refreshIcon.style.transform = 'rotate(360deg)';
+            refreshIcon.style.transition = 'transform 0.5s ease-out';
+            setTimeout(() => {
+                refreshIcon.style.transform = 'rotate(0deg)';
+            }, 500);
+        }
+
+        // Accessibility: Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const focusedElement = document.activeElement;
+                if (focusedElement.classList.contains('setting-item')) {
+                    e.preventDefault();
+                    focusedElement.click();
+                }
+            }
+        });
+
+        // Add focus styles for keyboard navigation
+        const style = document.createElement('style');
+        style.textContent = `
+            .setting-item:focus {
+                outline: 2px solid var(--primary);
+                outline-offset: 2px;
+            }
+            .theme-option:focus {
+                outline: 2px solid var(--primary);
+                outline-offset: 2px;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Make setting items focusable
+        document.querySelectorAll('.setting-item').forEach(item => {
+            item.setAttribute('tabindex', '0');
+        });
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.setAttribute('tabindex', '0');
+        });
+
+        console.log('MaxSpeak Settings mockup loaded successfully!');
+    </script>
+</body>
+</html>

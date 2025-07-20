@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../../shared/utils/app_theme.dart';
 import '../../domain/entities/document.dart';
@@ -5,11 +6,13 @@ import '../../domain/entities/document.dart';
 class DocumentCard extends StatelessWidget {
   final Document document;
   final VoidCallback onTap;
+  final VoidCallback? onDelete;
 
   const DocumentCard({
     super.key,
     required this.document,
     required this.onTap,
+    this.onDelete,
   });
 
   @override
@@ -18,6 +21,7 @@ class DocumentCard extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onDelete != null ? () => _showContextMenu(context) : null,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -35,14 +39,36 @@ class DocumentCard extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      // PDF Icon
-                      const Center(
-                        child: Icon(
-                          Icons.picture_as_pdf,
-                          size: 48,
-                          color: Colors.white,
+                      // Cover image or PDF icon
+                      if (document.coverImagePath != null)
+                        Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                            child: Image.file(
+                              File(document.coverImagePath!),
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback to PDF icon if image fails to load
+                                return const Center(
+                                  child: Icon(
+                                    Icons.picture_as_pdf,
+                                    size: 48,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      else
+                        // PDF Icon
+                        const Center(
+                          child: Icon(
+                            Icons.picture_as_pdf,
+                            size: 48,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
                       
                       // Progress indicator (if reading started)
                       if (document.isStarted && !document.isCompleted)
@@ -204,5 +230,65 @@ class DocumentCard extends StatelessWidget {
     } else {
       return Colors.grey;
     }
+  }
+
+  void _showContextMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLarge)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).dividerColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingL),
+              
+              // Document info
+              Text(
+                document.title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppTheme.spacingL),
+              
+              // Actions
+              ListTile(
+                leading: const Icon(Icons.open_in_new),
+                title: const Text('Open'),
+                onTap: () {
+                  Navigator.pop(context);
+                  onTap();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete, color: AppTheme.errorColor),
+                title: Text('Delete', style: TextStyle(color: AppTheme.errorColor)),
+                onTap: () {
+                  Navigator.pop(context);
+                  onDelete?.call();
+                },
+              ),
+              
+              const SizedBox(height: AppTheme.spacingM),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

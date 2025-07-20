@@ -1,20 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/utils/app_theme.dart';
 import '../../domain/entities/document.dart';
+import '../providers/document_provider.dart';
 import 'document_card.dart';
 
-class DocumentGrid extends StatelessWidget {
+class DocumentGrid extends ConsumerWidget {
   const DocumentGrid({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // For now, show placeholder data until we connect to the repository
-    final sampleDocuments = _getSampleDocuments();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final documentsState = ref.watch(documentsProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
+    
+    // Show loading state
+    if (documentsState.isLoading && !documentsState.isInitialized) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: AppTheme.spacingM),
+            Text('Loading your library...'),
+          ],
+        ),
+      );
+    }
+    
+    // Show error state
+    if (documentsState.hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingXL),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              Text(
+                'Error Loading Library',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: AppTheme.spacingS),
+              Text(
+                documentsState.error!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppTheme.spacingL),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(documentsProvider.notifier).loadDocuments();
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-    if (sampleDocuments.isEmpty) {
-      return const EmptyLibraryView();
+    // Filter documents based on search query
+    final documents = searchQuery.isEmpty
+        ? documentsState.documents
+        : documentsState.documents.where((doc) {
+            final query = searchQuery.toLowerCase();
+            return doc.title.toLowerCase().contains(query) ||
+                   doc.originalFileName.toLowerCase().contains(query);
+          }).toList();
+
+    // Show empty state
+    if (documents.isEmpty) {
+      return EmptyLibraryView(
+        isSearching: searchQuery.isNotEmpty,
+        searchQuery: searchQuery,
+        onClearSearch: () => ref.read(searchQueryProvider.notifier).state = '',
+      );
     }
 
     return LayoutBuilder(
@@ -28,12 +95,13 @@ class DocumentGrid extends StatelessWidget {
             crossAxisSpacing: AppTheme.spacingM,
             mainAxisSpacing: AppTheme.spacingM,
           ),
-          itemCount: sampleDocuments.length,
+          itemCount: documents.length,
           itemBuilder: (context, index) {
-            final document = sampleDocuments[index];
+            final document = documents[index];
             return DocumentCard(
               document: document,
               onTap: () => _openDocument(context, document),
+              onDelete: () => _deleteDocument(context, ref, document),
             );
           },
         );
@@ -51,66 +119,105 @@ class DocumentGrid extends StatelessWidget {
     context.go(AppConstants.readerRoute, extra: document.id);
   }
 
-  // Sample data for demonstration
-  List<Document> _getSampleDocuments() {
-    return [
-      Document(
-        id: '1',
-        title: 'Introduction to Machine Learning',
-        filePath: '/fake/path/ml_intro.pdf',
-        originalFileName: 'ml_intro.pdf',
-        totalPages: 150,
-        fileSizeBytes: 5242880, // 5MB
-        dateAdded: DateTime.now().subtract(const Duration(days: 7)),
-        lastOpened: DateTime.now().subtract(const Duration(hours: 2)),
-        readingProgress: 0.45,
-        currentPage: 68,
+  Future<void> _deleteDocument(BuildContext context, WidgetRef ref, Document document) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Document'),
+        content: Text('Are you sure you want to delete "${document.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
-      Document(
-        id: '2',
-        title: 'Python Programming Guide',
-        filePath: '/fake/path/python_guide.pdf',
-        originalFileName: 'python_guide.pdf',
-        totalPages: 89,
-        fileSizeBytes: 3145728, // 3MB
-        dateAdded: DateTime.now().subtract(const Duration(days: 3)),
-        lastOpened: DateTime.now().subtract(const Duration(days: 3)),
-        readingProgress: 0.0,
-        currentPage: 1,
-      ),
-      Document(
-        id: '3',
-        title: 'Data Structures and Algorithms',
-        filePath: '/fake/path/dsa.pdf',
-        originalFileName: 'dsa.pdf',
-        totalPages: 324,
-        fileSizeBytes: 8388608, // 8MB
-        dateAdded: DateTime.now().subtract(const Duration(days: 14)),
-        lastOpened: DateTime.now().subtract(const Duration(days: 1)),
-        readingProgress: 0.12,
-        currentPage: 39,
-      ),
-      Document(
-        id: '4',
-        title: 'Study Materials - Final Exam',
-        filePath: '/fake/path/exam_materials.pdf',
-        originalFileName: 'exam_materials.pdf',
-        totalPages: 67,
-        fileSizeBytes: 2097152, // 2MB
-        dateAdded: DateTime.now().subtract(const Duration(days: 1)),
-        lastOpened: DateTime.now().subtract(const Duration(minutes: 30)),
-        readingProgress: 1.0,
-        currentPage: 67,
-      ),
-    ];
+    );
+
+    if (confirmed == true && context.mounted) {
+      final success = await ref.read(documentsProvider.notifier).removeDocument(document.id);
+      
+      if (context.mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${AppConstants.documentDeletedSuccess}: ${document.title}'),
+              backgroundColor: AppTheme.secondaryColor,
+            ),
+          );
+        } else {
+          final error = ref.read(documentsProvider).error ?? 'Failed to delete document';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $error'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+      }
+    }
   }
+
 }
 
 class EmptyLibraryView extends StatelessWidget {
-  const EmptyLibraryView({super.key});
+  final bool isSearching;
+  final String searchQuery;
+  final VoidCallback? onClearSearch;
+
+  const EmptyLibraryView({
+    super.key,
+    this.isSearching = false,
+    this.searchQuery = '',
+    this.onClearSearch,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (isSearching) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingXL),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.search_off,
+                size: 64,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              ),
+              const SizedBox(height: AppTheme.spacingL),
+              Text(
+                'No Results Found',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              Text(
+                'No documents match "$searchQuery".\nTry adjusting your search terms.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingL),
+              if (onClearSearch != null)
+                ElevatedButton(
+                  onPressed: onClearSearch,
+                  child: const Text('Clear Search'),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spacingXL),
@@ -140,7 +247,7 @@ class EmptyLibraryView extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingXL),
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: Trigger FAB action
+                // Could trigger FAB action via callback if needed
               },
               icon: const Icon(Icons.add),
               label: const Text('Add Document'),

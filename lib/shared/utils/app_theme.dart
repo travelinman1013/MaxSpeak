@@ -105,12 +105,12 @@ class AppTheme {
     ),
     
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: lightSurface,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radiusMedium),
-        side: BorderSide(color: lightBorder, width: 1),
+        side: const BorderSide(color: lightBorder, width: 1),
       ),
     ),
     
@@ -221,12 +221,12 @@ class AppTheme {
     ),
     
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: darkSurface,
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radiusMedium),
-        side: BorderSide(color: darkBorder, width: 1),
+        side: const BorderSide(color: darkBorder, width: 1),
       ),
     ),
     
