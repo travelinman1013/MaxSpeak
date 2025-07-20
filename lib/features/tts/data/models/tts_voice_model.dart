@@ -6,30 +6,39 @@ part 'tts_voice_model.g.dart';
 @HiveType(typeId: 5)
 class TtsVoiceModel extends TtsVoice {
   @HiveField(0)
+  @override
   final String id;
   
   @HiveField(1)
+  @override
   final String name;
   
   @HiveField(2)
+  @override
   final String language;
   
   @HiveField(3)
+  @override
   final String locale;
   
   @HiveField(4)
+  @override
   final bool isLocal;
   
   @HiveField(5)
+  @override
   final bool isDefault;
   
   @HiveField(6)
+  @override
   final String? gender;
   
   @HiveField(7)
+  @override
   final int? quality;
   
   @HiveField(8)
+  @override
   final double? size;
 
   const TtsVoiceModel({
@@ -96,6 +105,7 @@ class TtsVoiceModel extends TtsVoice {
     };
   }
 
+  @override
   TtsVoiceModel copyWith({
     String? id,
     String? name,

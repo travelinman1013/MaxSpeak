@@ -7,30 +7,39 @@ part 'tts_settings_model.g.dart';
 @HiveType(typeId: 6)
 class TtsSettingsModel extends TtsSettings {
   @HiveField(0)
+  @override
   final TtsVoiceModel? selectedVoice;
   
   @HiveField(1)
+  @override
   final double speechRate;
   
   @HiveField(2)
+  @override
   final double pitch;
   
   @HiveField(3)
+  @override
   final double volume;
   
   @HiveField(4)
+  @override
   final bool autoScroll;
   
   @HiveField(5)
+  @override
   final bool highlightWords;
   
   @HiveField(6)
+  @override
   final bool pauseOnPhoneCalls;
   
   @HiveField(7)
+  @override
   final bool enableBackgroundPlayback;
   
   @HiveField(8)
+  @override
   final int skipSeconds;
 
   const TtsSettingsModel({
@@ -130,24 +139,31 @@ class TtsSettingsModel extends TtsSettings {
 @HiveType(typeId: 7)
 class TtsPlaybackInfoModel extends TtsPlaybackInfo {
   @HiveField(0)
+  @override
   final TtsPlaybackState state;
   
   @HiveField(1)
+  @override
   final String? currentText;
   
   @HiveField(2)
+  @override
   final int currentWordIndex;
   
   @HiveField(3)
+  @override
   final int totalWords;
   
   @HiveField(4)
+  @override
   final Duration currentPosition;
   
   @HiveField(5)
+  @override
   final Duration totalDuration;
   
   @HiveField(6)
+  @override
   final String? error;
 
   const TtsPlaybackInfoModel({
@@ -180,6 +196,7 @@ class TtsPlaybackInfoModel extends TtsPlaybackInfo {
     );
   }
 
+  @override
   TtsPlaybackInfoModel copyWith({
     TtsPlaybackState? state,
     String? currentText,

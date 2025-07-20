@@ -6,27 +6,35 @@ part 'reading_position_model.g.dart';
 @HiveType(typeId: 4)
 class ReadingPositionModel extends ReadingPosition {
   @HiveField(0)
+  @override
   final String documentId;
   
   @HiveField(1)
+  @override
   final int currentPage;
   
   @HiveField(2)
+  @override
   final double scrollOffset;
   
   @HiveField(3)
+  @override
   final double zoomLevel;
   
   @HiveField(4)
+  @override
   final DateTime lastUpdated;
   
   @HiveField(5)
+  @override
   final int? selectedTextStart;
   
   @HiveField(6)
+  @override
   final int? selectedTextEnd;
   
   @HiveField(7)
+  @override
   final String? selectedText;
 
   const ReadingPositionModel({
@@ -62,6 +70,7 @@ class ReadingPositionModel extends ReadingPosition {
     );
   }
 
+  @override
   ReadingPositionModel copyWith({
     String? documentId,
     int? currentPage,

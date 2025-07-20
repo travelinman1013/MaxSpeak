@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/database_service.dart';
 import 'core/services/encryption_service.dart';
@@ -38,9 +37,9 @@ Future<void> _initializeServices() async {
     // Initialize encryption service
     await EncryptionService.instance.initialize();
     
-    print('All core services initialized successfully');
+    debugPrint('All core services initialized successfully');
   } catch (e) {
-    print('Error initializing services: $e');
+    debugPrint('Error initializing services: $e');
     // In a production app, you might want to show an error dialog
     // and potentially exit the app or use fallback modes
   }

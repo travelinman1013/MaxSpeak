@@ -26,7 +26,7 @@ class TtsControlOverlay extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.9),
+            color: Colors.black.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.orange, width: 1),
           ),
@@ -140,7 +140,7 @@ class TtsControlOverlay extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -175,8 +175,8 @@ class TtsControlOverlay extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: onPressed != null 
-              ? Colors.orange.withOpacity(0.2)
-              : Colors.grey.withOpacity(0.1),
+              ? Colors.orange.withValues(alpha: 0.2)
+              : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: IconButton(

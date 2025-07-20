@@ -295,7 +295,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   trailing: const Icon(Icons.open_in_new, size: 18),
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    // TODO: Open privacy policy
+                    Navigator.pushNamed(context, '/privacy-policy');
                   },
                 ),
                 const SizedBox(height: AppTheme.spacingS),
@@ -309,7 +309,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   trailing: const Icon(Icons.open_in_new, size: 18),
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    // TODO: Open terms of service
+                    Navigator.pushNamed(context, '/terms-of-service');
                   },
                 ),
                 const SizedBox(height: AppTheme.spacingS),
