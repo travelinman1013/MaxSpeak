@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxSpeak - Library View</title>
+    <link rel="stylesheet" href="theme_1.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--background);
+            color: var(--foreground);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-bar {
+            background-color: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-xs);
+        }
+        
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .icon-button {
+            min-width: 48px;
+            min-height: 48px;
+            border-radius: var(--radius);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .icon-button:hover {
+            background-color: var(--muted);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .document-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .document-card {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .document-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+        
+        .document-cover {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: calc(var(--radius) / 2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .document-cover i {
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .document-title {
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .document-info {
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background-color: var(--muted);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--reading-progress);
+            transition: width var(--transition-normal);
+        }
+        
+        .bottom-nav {
+            background-color: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            color: var(--muted-foreground);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 5rem;
+            right: 1.5rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-normal);
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .document-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .content {
+                padding: 2rem;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App Bar -->
+        <header class="app-bar">
+            <button class="icon-button">
+                <i data-lucide="menu" size="24"></i>
+            </button>
+            <h1 class="app-title">MaxSpeak</h1>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="icon-button">
+                    <i data-lucide="search" size="24"></i>
+                </button>
+                <button class="icon-button">
+                    <i data-lucide="settings" size="24"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="content">
+            <h2 class="section-title">Your Library</h2>
+            
+            <div class="document-grid">
+                <!-- Document 1 -->
+                <div class="document-card">
+                    <div class="document-cover">
+                        <i data-lucide="file-text" size="48"></i>
+                    </div>
+                    <h3 class="document-title">Introduction to Machine Learning</h3>
+                    <p class="document-info">150 pages</p>
+                    <p class="document-info">45% read</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Document 2 -->
+                <div class="document-card">
+                    <div class="document-cover" style="background: linear-gradient(135deg, #2ECC71, #27AE60);">
+                        <i data-lucide="file-text" size="48"></i>
+                    </div>
+                    <h3 class="document-title">Python Programming Guide</h3>
+                    <p class="document-info">89 pages</p>
+                    <p class="document-info">Not started</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Document 3 -->
+                <div class="document-card">
+                    <div class="document-cover" style="background: linear-gradient(135deg, #E74C3C, #C0392B);">
+                        <i data-lucide="file-text" size="48"></i>
+                    </div>
+                    <h3 class="document-title">Data Structures and Algorithms</h3>
+                    <p class="document-info">324 pages</p>
+                    <p class="document-info">12% read</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 12%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Document 4 -->
+                <div class="document-card">
+                    <div class="document-cover" style="background: linear-gradient(135deg, #9B59B6, #8E44AD);">
+                        <i data-lucide="file-text" size="48"></i>
+                    </div>
+                    <h3 class="document-title">Study Materials - Final Exam</h3>
+                    <p class="document-info">67 pages</p>
+                    <p class="document-info">100% read</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Floating Action Button -->
+        <button class="fab">
+            <i data-lucide="plus" size="24"></i>
+        </button>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-item active">
+                <i data-lucide="book-open" size="24"></i>
+                <span>Library</span>
+            </div>
+            <div class="nav-item">
+                <i data-lucide="headphones" size="24"></i>
+                <span>Now Playing</span>
+            </div>
+            <div class="nav-item">
+                <i data-lucide="bar-chart-2" size="24"></i>
+                <span>Stats</span>
+            </div>
+            <div class="nav-item">
+                <i data-lucide="star" size="24"></i>
+                <span>Premium</span>
+            </div>
+        </nav>
+    </div>
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Add interactivity
+        document.querySelectorAll('.document-card').forEach(card => {
+            card.addEventListener('click', () => {
+                // In real app, this would navigate to reader
+                console.log('Opening document...');
+            });
+        });
+        
+        document.querySelector('.fab').addEventListener('click', () => {
+            // In real app, this would open file picker
+            console.log('Adding new document...');
+        });
+        
+        // Theme toggle demo
+        let isDark = false;
+        document.querySelector('.icon-button:last-child').addEventListener('click', () => {
+            isDark = !isDark;
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>

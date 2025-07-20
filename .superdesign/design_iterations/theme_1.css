@@ -1,0 +1,150 @@
+/* MaxSpeak Theme - Optimized for Reading */
+:root {
+  /* Base Colors - High contrast for extended reading */
+  --background: #FFFFFF;
+  --foreground: #1A1A1A;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1A;
+  
+  /* Primary - Warm accent avoiding generic blues */
+  --primary: #FF6B35;
+  --primary-foreground: #FFFFFF;
+  
+  /* Secondary - Complementary green */
+  --secondary: #2ECC71;
+  --secondary-foreground: #FFFFFF;
+  
+  /* Muted - For less important text */
+  --muted: #F5F5F5;
+  --muted-foreground: #6B6B6B;
+  
+  /* Accent - For highlights and selection */
+  --accent: #FFD93D;
+  --accent-foreground: #1A1A1A;
+  
+  /* Destructive - For errors and warnings */
+  --destructive: #E74C3C;
+  --destructive-foreground: #FFFFFF;
+  
+  /* Borders and inputs */
+  --border: #E0E0E0;
+  --input: #F8F8F8;
+  --ring: #FF6B35;
+  
+  /* Reading-specific colors */
+  --highlight: rgba(255, 217, 61, 0.3);
+  --text-selection: rgba(255, 107, 53, 0.2);
+  --reading-progress: #2ECC71;
+  
+  /* Typography - Optimized for readability */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-reading: 'Merriweather', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  
+  /* Spacing */
+  --radius: 12px;
+  --spacing: 1rem;
+  
+  /* Shadows - Subtle for focus */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.16);
+  
+  /* Animation timing */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+
+/* Dark mode - Eye-friendly for night reading */
+[data-theme="dark"] {
+  --background: #1A1A1A;
+  --foreground: #F5F5F5;
+  --card: #2A2A2A;
+  --card-foreground: #F5F5F5;
+  --popover: #2A2A2A;
+  --popover-foreground: #F5F5F5;
+  
+  --primary: #FF8A65;
+  --primary-foreground: #1A1A1A;
+  
+  --secondary: #4CAF50;
+  --secondary-foreground: #1A1A1A;
+  
+  --muted: #2A2A2A;
+  --muted-foreground: #A0A0A0;
+  
+  --accent: #FFE082;
+  --accent-foreground: #1A1A1A;
+  
+  --destructive: #F44336;
+  --destructive-foreground: #FFFFFF;
+  
+  --border: #3A3A3A;
+  --input: #2A2A2A;
+  --ring: #FF8A65;
+  
+  --highlight: rgba(255, 224, 130, 0.2);
+  --text-selection: rgba(255, 138, 101, 0.2);
+  --reading-progress: #4CAF50;
+  
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Typography scales for reading */
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.text-base { font-size: 1rem; line-height: 1.5rem; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+
+/* Reading-specific typography */
+.reading-text {
+  font-family: var(--font-reading);
+  font-size: 1.125rem;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Component specific styles */
+.button-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+/* Accessibility - Large touch targets */
+.touch-target {
+  min-width: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
