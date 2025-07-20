@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/utils/app_theme.dart';
+import '../providers/document_provider.dart';
+import 'document_search_delegate.dart';
 
-class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
+class LibraryAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const LibraryAppBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AppBar(
       title: Text(
         AppConstants.appName,
@@ -20,10 +23,7 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: IconButton(
         icon: const Icon(Icons.menu),
         onPressed: () {
-          // TODO: Open drawer/side menu
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Menu - Coming Soon')),
-          );
+          Scaffold.of(context).openDrawer();
         },
         tooltip: 'Menu',
       ),
@@ -31,10 +31,10 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.search),
           onPressed: () {
-            // TODO: Open search
+            final documents = ref.read(documentsProvider).documents;
             showSearch(
               context: context,
-              delegate: DocumentSearchDelegate(),
+              delegate: DocumentSearchDelegate(documents: documents),
             );
           },
           tooltip: 'Search',
@@ -56,43 +56,4 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
-
-// Simple search delegate for now
-class DocumentSearchDelegate extends SearchDelegate<String> {
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, '');
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return const Center(
-      child: Text('Search functionality coming soon'),
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return const Center(
-      child: Text('Start typing to search your documents'),
-    );
-  }
 }

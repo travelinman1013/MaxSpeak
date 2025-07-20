@@ -5,6 +5,8 @@ import '../../core/constants/app_constants.dart';
 import '../../features/library/presentation/pages/library_page.dart';
 import '../../features/reader/presentation/pages/reader_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/settings/presentation/pages/privacy_policy_page.dart';
+import '../../features/settings/presentation/pages/terms_of_service_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -52,6 +54,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const PremiumPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        name: 'privacy-policy',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const PrivacyPolicyPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/terms-of-service',
+        name: 'terms-of-service',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const TermsOfServicePage(),
         ),
       ),
     ],

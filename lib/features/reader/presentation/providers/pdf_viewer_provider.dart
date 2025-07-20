@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
-import '../../domain/entities/pdf_page.dart';
 import '../../domain/entities/reading_position.dart';
 import '../../domain/usecases/load_pdf_document.dart';
 import '../../domain/usecases/navigate_pages.dart';

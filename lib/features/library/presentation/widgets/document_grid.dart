@@ -189,7 +189,7 @@ class EmptyLibraryView extends StatelessWidget {
               Icon(
                 Icons.search_off,
                 size: 64,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               ),
               const SizedBox(height: AppTheme.spacingL),
               Text(
@@ -203,7 +203,7 @@ class EmptyLibraryView extends StatelessWidget {
                 'No documents match "$searchQuery".\nTry adjusting your search terms.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: AppTheme.spacingL),
@@ -227,7 +227,7 @@ class EmptyLibraryView extends StatelessWidget {
             Icon(
               Icons.library_books_outlined,
               size: 80,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: AppTheme.spacingL),
             Text(
@@ -241,7 +241,7 @@ class EmptyLibraryView extends StatelessWidget {
               'Tap the + button to add your first document and start your reading journey.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: AppTheme.spacingXL),

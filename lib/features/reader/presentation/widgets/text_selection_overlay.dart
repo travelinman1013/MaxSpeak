@@ -24,7 +24,7 @@ class TextSelectionOverlay extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.9),
+            color: Colors.black.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.orange, width: 1),
           ),
@@ -63,7 +63,7 @@ class TextSelectionOverlay extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -131,7 +131,7 @@ class TextSelectionOverlay extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.2),
+                    color: Colors.red.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -177,7 +177,7 @@ class TextSelectionOverlay extends ConsumerWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.orange.withOpacity(0.2),
+            color: Colors.orange.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: IconButton(

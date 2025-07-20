@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../../../library/domain/usecases/get_all_documents.dart';
 import '../../../library/presentation/providers/document_provider.dart';
 import '../providers/pdf_viewer_provider.dart';
 import '../providers/text_selection_provider.dart';

@@ -6,21 +6,27 @@ part 'pdf_page_model.g.dart';
 @HiveType(typeId: 3)
 class PdfPageModel extends PdfPage {
   @HiveField(0)
+  @override
   final int pageNumber;
   
   @HiveField(1)
+  @override
   final double width;
   
   @HiveField(2)
+  @override
   final double height;
   
   @HiveField(3)
+  @override
   final String? thumbnailPath;
   
   @HiveField(4)
+  @override
   final String? extractedText;
   
   @HiveField(5)
+  @override
   final bool isLoaded;
 
   const PdfPageModel({
@@ -50,6 +56,7 @@ class PdfPageModel extends PdfPage {
     );
   }
 
+  @override
   PdfPageModel copyWith({
     int? pageNumber,
     double? width,

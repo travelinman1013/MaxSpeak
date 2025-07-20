@@ -111,7 +111,7 @@ class AddDocumentFab extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
               child: Icon(
@@ -135,7 +135,7 @@ class AddDocumentFab extends ConsumerWidget {
                   Text(
                     subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -144,7 +144,7 @@ class AddDocumentFab extends ConsumerWidget {
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
+              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
             ),
           ],
         ),
@@ -203,7 +203,15 @@ class AddDocumentFab extends ConsumerWidget {
                     label: 'View',
                     textColor: Colors.white,
                     onPressed: () {
-                      // TODO: Navigate to document reader
+                      final documents = ref.read(documentsProvider).documents;
+                      if (documents.isNotEmpty) {
+                        final latestDocument = documents.first;
+                        Navigator.pushNamed(
+                          context,
+                          '/reader',
+                          arguments: latestDocument.id,
+                        );
+                      }
                     },
                   ),
                 ),

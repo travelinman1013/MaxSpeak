@@ -8,6 +8,7 @@ import '../widgets/document_grid.dart';
 import '../widgets/library_app_bar.dart';
 import '../widgets/bottom_navigation.dart';
 import '../widgets/add_document_fab.dart';
+import '../../../reader/presentation/widgets/tts_control_overlay.dart';
 
 class LibraryPage extends ConsumerStatefulWidget {
   const LibraryPage({super.key});
@@ -37,9 +38,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       case 0: // Library - already here
         break;
       case 1: // Now Playing
-        // TODO: Navigate to now playing or show bottom sheet
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Now Playing - Coming Soon')),
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const TtsControlOverlay(),
         );
         break;
       case 2: // Stats
